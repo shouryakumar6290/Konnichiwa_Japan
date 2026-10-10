@@ -1,0 +1,78 @@
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Sparkles, Menu } from 'lucide-react';
+import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton, useUser } from '@clerk/clerk-react';
+
+const Navbar = () => {
+  const { user } = useUser();
+  const location = useLocation();
+
+  const isActive = (path) => {
+    return location.pathname === path ? 'text-gray-900' : 'text-gray-600';
+  };
+
+  return (
+    <nav className="fixed top-0 w-full z-50 py-4 bg-white/85 backdrop-blur-md border-b border-japan-red/15">
+      <div className="w-full px-6 md:px-12 flex justify-between items-center">
+        <Link to="/" className="group flex items-center gap-3 no-underline">
+          <div className="w-7 h-7 rounded-full bg-japan-red shrink-0 shadow-[0_2px_10px_rgba(230,0,18,0.3)] transition-transform duration-300 group-hover:scale-110"></div>
+          <span className="text-2xl font-bold tracking-tight text-gray-900">
+            Konnichiwa <span className="text-japan-red">Japan</span>
+          </span>
+        </Link>
+
+        <div className="flex gap-8 items-center">
+          <Link to="/" className={`font-medium transition-colors duration-200 hover:text-gray-900 ${isActive('/')}`}>Home</Link>
+          <Link to="/lifestyle" className={`font-medium transition-colors duration-200 hover:text-gray-900 ${isActive('/lifestyle')}`}>Lifestyle</Link>
+          <Link to="/health" className={`font-medium transition-colors duration-200 hover:text-gray-900 ${isActive('/health')}`}>Health</Link>
+          <Link to="/learn-japanese" className={`font-medium transition-colors duration-200 hover:text-gray-900 ${isActive('/learn-japanese')}`}>Learn Japanese</Link>
+          <Link to="/garbage-collector" className={`font-medium transition-colors duration-200 hover:text-gray-900 ${isActive('/garbage-collector')}`}>Garbage Collector</Link>
+          <Link to="/puzzles" className={`font-medium transition-colors duration-200 hover:text-gray-900 ${isActive('/puzzles')}`}>Puzzles</Link>
+          <a href="http://localhost:5174" target="_blank" rel="noopener noreferrer" className="font-medium transition-colors duration-200 text-japan-red hover:text-japan-red-hover flex items-center gap-1">
+            <Sparkles className="w-4 h-4" /> AI Chat
+          </a>
+        </div>
+
+        <div className="flex gap-4 items-center">
+          <select 
+            className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white"
+            onChange={(e) => {
+              const city = e.target.value;
+              localStorage.setItem('selectedCity', city);
+              if (user) {
+                fetch('/api/users/city', {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ clerkId: user.id, city })
+                }).catch(console.error);
+              }
+              // Dispatch event so iframe can pick it up if on same page
+              window.dispatchEvent(new Event('cityChanged'));
+            }}
+            defaultValue={localStorage.getItem('selectedCity') || 'Tokyo'}
+          >
+            <option value="Tokyo">Tokyo</option>
+            <option value="Osaka">Osaka</option>
+            <option value="Kyoto">Kyoto</option>
+          </select>
+          <SignedOut>
+            <SignInButton mode="modal">
+              <button className="px-5 py-2 rounded-lg font-medium cursor-pointer transition-all duration-200 text-gray-900 border border-japan-red/15 bg-transparent hover:bg-black/5">Log in</button>
+            </SignInButton>
+            <SignUpButton mode="modal">
+              <button className="px-5 py-2 rounded-lg font-medium cursor-pointer transition-all duration-200 bg-japan-red text-white border-none hover:bg-japan-red-hover hover:-translate-y-[1px] hover:shadow-[0_4px_12px_rgba(230,0,18,0.3)]">Sign up</button>
+            </SignUpButton>
+          </SignedOut>
+          <SignedIn>
+            <div className="flex items-center gap-3">
+              <span className="text-gray-700 font-medium text-sm hidden sm:inline-block">Welcome, {user?.firstName || 'Traveler'}</span>
+              <UserButton />
+            </div>
+          </SignedIn>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;
