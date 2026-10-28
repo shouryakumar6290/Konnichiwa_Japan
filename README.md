@@ -292,3 +292,5 @@ Create the required environment variables for MongoDB, Clerk and other services 
 # 🇯🇵 Konnichiwa Japan
 
 ### *Learn the language. Understand the system. Enjoy the journey.*
+
+Made with ❤️ by Shourya Kumar.
